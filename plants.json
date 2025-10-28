@@ -9,7 +9,7 @@
       "bulletSpeed": 0,
       "color": "#FFD36E",
       "size": 44,
-      "sunPerInterval": 20,
+      "sunPerInterval": 25,
       "sunInterval": 4000
     },
     {

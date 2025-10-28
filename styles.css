@@ -101,11 +101,7 @@ body {
   flex: 1 1 auto;
 }
 
-/* ==========================================================================
-  PLANT SELECTOR
-  Horizontal scrolling list of plant options.
-  ==========================================================================
-*/
+/* Plant Selector */
 .plant-selector {
   display: flex;
   gap: 12px;
@@ -132,9 +128,9 @@ body {
 }
 
 .plant-btn:hover {
-  transform: translateY(-4px); /* Slightly less 'jumpy' lift */
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4); /* Refined shadow */
-  border-color: var(--text-accent); /* Use accent variable */
+  transform: translateY(-4px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  border-color: var(--text-accent);
 }
 
 .plant-btn.active {

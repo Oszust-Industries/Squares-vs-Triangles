@@ -4,7 +4,7 @@
       "id": "triangle",
       "name": "Triangle",
       "hp": 60,
-      "speed": 0.05,
+      "speed": 0.005,
       "colorBase": "#FFB36A",
       "reward": 10
     },
@@ -12,7 +12,7 @@
       "id": "pentagon",
       "name": "Pentagon",
       "hp": 160,
-      "speed": 0.015,
+      "speed": 0.0015,
       "colorBase": "#FF7A7A",
       "reward": 25
     }
@@ -21,18 +21,6 @@
     {
       "count": 5,
       "interval": 1000
-    },
-    {
-      "count": 8,
-      "interval": 900
-    },
-    {
-      "count": 12,
-      "interval": 800
-    },
-    {
-      "count": 16,
-      "interval": 700
     }
   ]
 }

@@ -31,11 +31,35 @@ let waveQueue = [];
 let waveTimer = 0;
 let waveInProgress = false;
 
+function updatePlantSelectorAvailability() {
+  if (!plantsConfig) return;
+
+  document.querySelectorAll('.plant-btn').forEach(btn => {
+    const plantId = btn.dataset.id;
+    const plantCfg = plantsConfig.plants.find(p => p.id === plantId);
+    
+    if (plantCfg) {
+      if (sun < plantCfg.cost) {
+        btn.classList.add('locked');
+      } else {
+        btn.classList.remove('locked');
+      }
+    }
+  });
+}
+
+function setSun(newAmount) {
+  sun = newAmount;
+  sunCountEl.textContent = sun;
+  updatePlantSelectorAvailability();
+}
+
 async function loadConfigs(){
   plantsConfig = await (await fetch('plants.json')).json();
   zombiesConfig = await (await fetch('zombies.json')).json();
   buildPlantSelector();
   buildWaves();
+  setSun(sun);
 }
 
 function buildPlantSelector(){
@@ -68,12 +92,24 @@ function buildWaves(){
 }
 
 function resize(){
-  const maxW = Math.min(1300, window.innerWidth - 120);
-  const maxH = Math.min(820, Math.max(480, window.innerHeight * 0.66));
-  canvas.width = Math.max(800, maxW);
-  canvas.height = maxH;
-  WIDTH = canvas.width; HEIGHT = canvas.height;
-  cellW = WIDTH / gridCols; cellH = HEIGHT / gridRows;
+  const cssMaxW = Math.min(1300, window.innerWidth - 120);
+  const cssMaxH = Math.min(820, Math.max(480, window.innerHeight * 0.66));
+  const cssWidth = Math.max(800, cssMaxW);
+  const cssHeight = cssMaxH;
+
+  const dpr = Math.max(1, window.devicePixelRatio || 1);
+  canvas.style.width = cssWidth + 'px';
+  canvas.style.height = cssHeight + 'px';
+  canvas.width = Math.round(cssWidth * dpr);
+  canvas.height = Math.round(cssHeight * dpr);
+
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+  WIDTH = cssWidth;
+  HEIGHT = cssHeight;
+
+  cellW = WIDTH / gridCols;
+  cellH = HEIGHT / gridRows;
 }
 
 function gridToXY(r,c){
@@ -94,8 +130,9 @@ canvas.addEventListener('click', (e)=>{
     if (occupied) { flashOverlay('Cell occupied'); return; }
     if (sun < selectedPlant.cost) { flashOverlay('Not enough sun'); return; }
     placePlant(r,c,selectedPlant);
-    sun -= selectedPlant.cost;
-    sunCountEl.textContent = sun;
+    
+    setSun(sun - selectedPlant.cost);
+
     document.querySelectorAll('.plant-btn').forEach(b=>b.classList.remove('active'));
     selectedPlant = null;
   } else {
@@ -105,7 +142,6 @@ canvas.addEventListener('click', (e)=>{
 
 function placePlant(r,c,config){
   plants.push({r,c,config,lastShot:0, sinceSun:0});
-  // brief placement pulse effect
   particles.push({
     x: c*cellW + cellW/2,
     y: r*cellH + cellH/2,
@@ -144,8 +180,7 @@ function update(dt){
     if (p.config.id === 'sunflower'){
       p.sinceSun += dt;
       if (p.sinceSun > (p.config.sunInterval || 4000)){
-        sun += p.config.sunPerInterval || 15;
-        sunCountEl.textContent = sun;
+        setSun(sun + (p.config.sunPerInterval || 15));
         p.sinceSun = 0;
         particles.push({x: p.c*cellW + cellW/2, y: p.r*cellH + cellH/2 - 10, vx:0, vy:-0.06, life:800, size:10, type:'sun', color:'#FFD36E'});
       }
@@ -184,7 +219,6 @@ function update(dt){
     }
   }
 
-  // zombies movement (smooth)
   for (let i=zombies.length-1;i>=0;i--){
     const z = zombies[i];
     // if in front of a plant in same cell, "eat" it
@@ -205,8 +239,10 @@ function update(dt){
       z.x -= z.speed * (dt/16) * 60;
     }
     if (z.hp <= 0){
-      sun += z.reward || 8;
-      sunCountEl.textContent = sun;
+      
+      // UPDATED
+      setSun(sun + (z.reward || 8));
+      
       // death particles
       for (let p=0;p<8;p++){
         particles.push({x: z.x + (Math.random()-0.5)*20, y: z.y + (Math.random()-0.5)*20, vx:(Math.random()-0.5)*1.2, vy:(Math.random()-0.5)*1.2, life:600 + Math.random()*400, size:6, type:'spark', color:'#ffddff'});
@@ -258,12 +294,41 @@ function fireBullet(p, target){
 }
 
 function drawGrid(){
+  // clear any alpha state that could bleed into subsequent draws
   ctx.save();
-  ctx.globalAlpha = 0.06;
-  for (let r=0;r<gridRows;r++){
-    ctx.fillStyle = r%2===0 ? 'rgba(255,255,255,0.01)' : 'rgba(255,255,255,0.015)';
-    ctx.fillRect(0, r*cellH, WIDTH, cellH);
+  ctx.globalAlpha = 1;
+
+  // alternating row fills (use semi-transparent rgba values directly)
+  for (let r = 0; r < gridRows; r++){
+    ctx.fillStyle = r % 2 === 0
+      ? 'rgba(69, 66, 66, 0.62)'
+      : 'rgba(17, 15, 15, 0.84)';
+    // fill in logical coordinates
+    ctx.fillRect(0, r * cellH, WIDTH, cellH);
   }
+
+  // crisp 1px grid lines: draw on 0.5 offsets in logical pixels
+  ctx.lineWidth = 1;
+  ctx.strokeStyle = 'rgba(212, 202, 202, 0.12)';
+
+  // horizontal lines
+  for (let r = 0; r <= gridRows; r++){
+    const y = Math.round(r * cellH) + 0.5; // 0.5 for sharp 1px
+    ctx.beginPath();
+    ctx.moveTo(0.5, y);                // start at 0.5 so leftmost line is crisp
+    ctx.lineTo(WIDTH - 0.5, y);
+    ctx.stroke();
+  }
+
+  // vertical lines
+  for (let c = 0; c <= gridCols; c++){
+    const x = Math.round(c * cellW) + 0.5;
+    ctx.beginPath();
+    ctx.moveTo(x, 0.5);
+    ctx.lineTo(x, HEIGHT - 0.5);
+    ctx.stroke();
+  }
+
   ctx.restore();
 }
 
@@ -413,9 +478,12 @@ pauseBtn.addEventListener('click', ()=>{
   overlayTitle.textContent = 'Paused';
 });
 restartBtn.addEventListener('click', ()=>{
-  plants = []; bullets=[]; zombies=[]; particles=[]; sun=50; currentWave=0;
+  plants = []; bullets=[]; zombies=[]; particles=[]; currentWave=0;
   buildWaves();
-  sunCountEl.textContent = sun; gameRunning = false;
+  
+  setSun(50); // This now resets sun, updates text, AND updates buttons
+  
+  gameRunning = false;
   overlay.classList.remove('hidden'); overlayTitle.textContent='Restarted';
 });
 

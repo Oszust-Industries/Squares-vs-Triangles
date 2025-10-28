@@ -1,0 +1,46 @@
+{
+  "plants": [
+    {
+      "id": "sunflower",
+      "name": "Sun Square",
+      "cost": 25,
+      "damage": 0,
+      "rate": 0,
+      "bulletSpeed": 0,
+      "color": "#FFD36E",
+      "size": 44,
+      "sunPerInterval": 20,
+      "sunInterval": 4000
+    },
+    {
+      "id": "peashooter",
+      "name": "Pea Square",
+      "cost": 50,
+      "damage": 10,
+      "rate": 600,
+      "bulletSpeed": 4,
+      "color": "#6BE58A",
+      "size": 46
+    },
+    {
+      "id": "quick",
+      "name": "Quick Square",
+      "cost": 75,
+      "damage": 6,
+      "rate": 380,
+      "bulletSpeed": 5,
+      "color": "#73D8FF",
+      "size": 40
+    },
+    {
+      "id": "gatling",
+      "name": "Gatling Square",
+      "cost": 125,
+      "damage": 4,
+      "rate": 120,
+      "bulletSpeed": 6,
+      "color": "#D89BFF",
+      "size": 48
+    }
+  ]
+}

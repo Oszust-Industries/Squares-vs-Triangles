@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Squares vs Triangles</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="app">
+    <header class="topbar">
+      <div class="logo">Squares vs Triangles</div>
+      <div class="controls">
+        <button id="startBtn" class="btn">Start</button>
+        <button id="pauseBtn" class="btn">Pause</button>
+        <button id="restartBtn" class="btn">Restart</button>
+        <div class="score">Sun: <span id="sunCount">50</span></div>
+      </div>
+    </header>
+
+    <main class="main-area">
+      <section class="plant-selector" id="plantSelector" aria-label="Plant selector">
+        <!-- plant buttons populated by JS -->
+      </section>
+
+      <section class="game-wrap">
+        <canvas id="gameCanvas" aria-label="Game canvas"></canvas>
+        <div id="overlay" class="overlay hidden">
+          <div class="overlay-card">
+            <h2 id="overlayTitle">Paused</h2>
+            <p id="overlayText">Press Start to play.</p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <small>Click a plant, then click a cell to place it.</small>
+    </footer>
+  </div>
+
+  <script src="game.js" defer></script>
+</body>
+</html>
